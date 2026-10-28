@@ -165,6 +165,15 @@
 }
 
 @layer utilities {
+  .animate-ai-glow {
+    animation: ai-glow 6s linear infinite;
+  }
+
+  @keyframes ai-glow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
   .container {
     @apply mx-auto max-w-screen-2xl px-4 md:px-6 lg:px-8;
   }
@@ -196,7 +205,7 @@
     @apply w-full max-lg:border-t max-lg:border-gray-600 lg:w-[55%] lg:h-screen bg-gray-800 px-6 py-4 md:p-6 lg:py-12 lg:px-18 flex flex-col justify-start;
   }
   .auth-blockquote {
-    @apply text-sm md:text-xl lg:text-2xl font-medium text-gray-400 mb-1 md:mb-6 lg:mb-8;
+    @apply text-xl md:text-2xl lg:text-5xl font-medium leading-tight text-gray-400 mb-1 md:mb-6 lg:mb-8;
   }
   .auth-testimonial-author {
     @apply text-xs md:text-lg font-bold text-gray-400 not-italic;

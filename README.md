@@ -2,17 +2,20 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, run the Next.js development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+
+Then, in another terminal, launch Inngest Dev so background functions can run locally:
+
+```bash
+npm run inngest:dev
+```
+
+- The Inngest endpoint is served at `/api/inngest` in this repo.
+- Make sure required env vars are set (e.g. `GEMINI_API_KEY`) before running.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

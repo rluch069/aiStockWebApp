@@ -12,7 +12,7 @@ const Layout = async ({ children }: { children : React.ReactNode }) => {
         <main className="auth-layout">
             <section className="auth-left-section scrollbar-hide-default">
                 <Link href="/" className="auth-logo">
-                    <Image src="/assets/icons/logo.png" alt="Signalist logo" width={140} height={32} className='h-15 w-auto' />
+                    <Image src="/assets/icons/logo.png" alt="logo" width={140} height={32} className='h-15 w-auto' />
                 </Link>
 
                 <div className="pb-6 lg:pb-8 flex-1">{children}</div>
@@ -21,7 +21,18 @@ const Layout = async ({ children }: { children : React.ReactNode }) => {
             <section className="auth-right-section">
                 <div className="z-10 relative lg:mt-4 lg:mb-16">
                     <blockquote className="auth-blockquote">
-                        Signalist turned my watchlist into a winning list. The alerts are spot-on, and I feel more confident making moves in the market
+
+                        <span
+                            className="absolute inset-0 blur-xl opacity-50 animate-ai-glow bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent select-none"
+                            aria-hidden="true"
+                        >
+            Our ✨AI engine runs thousands of market scenarios in seconds, giving you the data-backed confidence to make your next move.
+        </span>
+
+
+                        <span className="relative z-10 animate-ai-glow bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent">
+            Our ✨AI engine runs thousands of market scenarios in seconds, giving you the data-backed confidence to make your next move.
+        </span>
                     </blockquote>
 
                 </div>

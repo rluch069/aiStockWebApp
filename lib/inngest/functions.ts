@@ -13,8 +13,7 @@ import EarningsSummary from "@/DATABASE/models/EarningsSummary";
 
 
 export const sendSignUpEmail = inngest.createFunction(
-    {id: 'sign-up-email'},
-    {event: 'app/user.created'},
+    {id: 'sign-up-email', triggers: {event: 'app/user.created'}},
     async ({event, step}) =>{
         const userProfile = `
             - Investment goals: ${event.data.investmentGoals}
@@ -51,8 +50,8 @@ export const sendSignUpEmail = inngest.createFunction(
 )
 
 export const sendDailyNewsSummary = inngest.createFunction(
-    {id: 'daily-news-summary'},
-    [{event: 'app/send.daily.news'}, { cron: '0 12 * * *' }], // current setting= at minute 0 of hour 12 every day -> runs daily at 12:00 UTC
+    // cron: at minute 0 of hour 12 every day -> runs daily at 12:00 UTC
+    {id: 'daily-news-summary', triggers: [{event: 'app/send.daily.news'}, { cron: '0 12 * * *' }]},
     async ({step}) =>{
         const users = await step.run('get-users', getAllUsersForNewsEmail);
         if(!users || users.length ===0) return {success: false, message: 'No users found'};
@@ -118,8 +117,7 @@ export const sendDailyNewsSummary = inngest.createFunction(
 
 // --- NEW FUNCTION: GENERATE AI EARNINGS SUMMARY ---
 export const generateEarningsSummary = inngest.createFunction(
-    { id: "generate-earnings-summary" },
-    { event: "stock.earnings.requested" },
+    { id: "generate-earnings-summary", triggers: { event: "stock.earnings.requested" } },
     async ({ event, step }) => {
         const { symbol } = event.data;
 

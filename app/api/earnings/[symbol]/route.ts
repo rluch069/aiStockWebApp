@@ -13,11 +13,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ symbol: 
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
     if (!summary || summary.updatedAt < ninetyDaysAgo) {
-        // Fire and forget the background job
-        await inngest.send({
-            name: "stock.earnings.requested",
-            data: { symbol: ticker }
-        });
+        // Fire and forget the background job. The card polls every 5s; the per-day event id makes
+        // Inngest ignore the repeats instead of starting a new Gemini job on every poll.
+        try {
+            await inngest.send({
+                id: `earnings-${ticker}-${new Date().toISOString().slice(0, 10)}`,
+                name: "stock.earnings.requested",
+                data: { symbol: ticker }
+            });
+        } catch (e) {
+            console.error("Could not queue earnings summary", e);
+            return NextResponse.json({ status: "error" }, { status: 503 });
+        }
 
         // Tell the frontend it's generating
         return NextResponse.json({ status: "processing" });

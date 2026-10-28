@@ -7,19 +7,25 @@ export default function EarningsCard({ symbol }: { symbol: string }) {
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
+        let polls = 0;
 
         const fetchEarnings = async () => {
             try {
                 const res = await fetch(`/api/earnings/${symbol}`);
                 const json = await res.json();
 
-                if (json.status === "processing") {
+                // Give up after ~2 minutes so a failed background job doesn't leave a spinner forever
+                if (json.status === "processing" && ++polls > 24) {
+                    setStatus("error");
+                } else if (json.status === "processing") {
                     setStatus("processing");
                     // Poll every 5 seconds while Inngest works in the background
                     interval = setTimeout(fetchEarnings, 5000);
                 } else if (json.status === "complete") {
                     setData(json.data);
                     setStatus("complete");
+                } else {
+                    setStatus("error");
                 }
             } catch (error) {
                 setStatus("error");

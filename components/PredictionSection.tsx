@@ -1,44 +1,50 @@
 'use client';
 
-import React, { useState } from 'react';
-import { BrainCircuit, Loader2, TrendingUp, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BrainCircuit, Loader2 } from 'lucide-react';
 
 export default function PredictionSection({ symbol }: { symbol: string }) {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<any>(null);
     const [error, setError] = useState('');
+    const [isInitialCheck, setIsInitialCheck] = useState(true);
 
-    // const runPrediction = async () => {
-    //     setLoading(true);
-    //     setError('');
-    //     try {
-    //         const res = await fetch(`/api/predict/${symbol}`);
-    //         const result = await res.json();
-    //         if (result.error) throw new Error(result.error);
-    //         setData(result);
-    //     } catch (err: any) {
-    //         setError(err.message || 'Failed to generate prediction');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
+    // 1. Silently check for a cached prediction when the page loads
+    useEffect(() => {
+        const checkCache = async () => {
+            try {
+                const res = await fetch(`/api/predict/${symbol}?checkOnly=true`);
+                const text = await res.text();
 
+                if (res.ok) {
+                    const result = JSON.parse(text);
+                    // Only auto-load if it was explicitly pulled from the cache
+                    if (result.cached) {
+                        setData(result);
+                    }
+                }
+            } catch (err) {
+                console.error("Cache check failed", err);
+            } finally {
+                setIsInitialCheck(false);
+            }
+        };
 
+        checkCache();
+    }, [symbol]);
+
+    // 2. The manual button trigger (runs Python if cache doesn't exist)
     const runPrediction = async () => {
         setLoading(true);
         setError('');
         try {
             const res = await fetch(`/api/predict/${symbol}`);
-
-            // 1. Get the raw text first instead of parsing JSON immediately
             const text = await res.text();
 
-            // 2. Check if the server returned an error code (like 500 or 504)
             if (!res.ok) {
                 throw new Error(`Server Error ${res.status}: ${text || 'Empty response'}`);
             }
 
-            // 3. Now try to parse it safely
             const result = JSON.parse(text);
             if (result.error) throw new Error(result.error);
 
@@ -50,6 +56,9 @@ export default function PredictionSection({ symbol }: { symbol: string }) {
             setLoading(false);
         }
     };
+
+    // Don't flash the button while we are silently checking the database
+    if (isInitialCheck) return null;
 
     return (
         <div className="mt-8 p-6 bg-slate-900 rounded-xl border border-slate-800 shadow-2xl">
@@ -64,7 +73,7 @@ export default function PredictionSection({ symbol }: { symbol: string }) {
                 {!data && !loading && (
                     <button
                         onClick={runPrediction}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all active:scale-95"
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all shadow-lg shadow-blue-900/50 active:scale-95"
                     >
                         PREDICT {symbol} PRICE WITH AI
                     </button>
@@ -74,7 +83,7 @@ export default function PredictionSection({ symbol }: { symbol: string }) {
             {loading && (
                 <div className="flex flex-col items-center py-12">
                     <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
-                    <p className="text-slate-300 animate-pulse">Training Neural Model & Simulating 50 Realities...</p>
+                    <p className="text-slate-300 animate-pulse">Training Neural Model & Simulating 100 Realities...</p>
                     <p className="text-xs text-slate-500 mt-2">This usually takes 45-60 seconds</p>
                 </div>
             )}
@@ -87,6 +96,13 @@ export default function PredictionSection({ symbol }: { symbol: string }) {
 
             {data && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    {/* Cache indicator badge */}
+                    {data.cached && (
+                        <div className="inline-block px-3 py-1 bg-emerald-900/30 border border-emerald-800 rounded-full text-xs text-emerald-400 font-semibold mb-2">
+                            ✓ Active 24-Hour Cache
+                        </div>
+                    )}
+
                     {/* Metrics Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <MetricCard label="Expected Target" value={`$${data.expected_target}`} sub="30-Day Mean" />

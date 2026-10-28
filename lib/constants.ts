@@ -41,7 +41,9 @@ export const MARKET_OVERVIEW_WIDGET_CONFIG = {
     colorTheme: 'dark', // dark mode
     dateRange: '12M', // last 12 months
     locale: 'en', // language
-    largeChartUrl: 'http://localhost:3000/stocks/{[symbol]}', // link to a large chart if needed
+    // const AI_ENGINE_URL = process.env.AI_API_URL || 'http://localhost:8000'
+    // largeChartUrl: 'http://localhost:3000/stocks/{[symbol]}', // link to a large chart if needed
+    largeChartUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/stocks/{[symbol]}`, // link to a large chart if needed
     isTransparent: true, // makes background transparent
     showFloatingTooltip: true, // show tooltip on hover
     plotLineColorGrowing: '#0FEDBE', // line color when price goes up
@@ -102,7 +104,8 @@ export const HEATMAP_WIDGET_CONFIG = {
     grouping: 'sector',
     isTransparent: true,
     locale: 'en',
-    symbolUrl: 'http://localhost:3000/stocks/{[symbol]}',
+    // symbolUrl: 'http://localhost:3000/stocks/{[symbol]}',
+    symbolUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/stocks/{[symbol]}`,
     colorTheme: 'dark',
     exchanges: [],
     hasTopBar: false,

@@ -5,11 +5,26 @@ import { Button } from '@/components/ui/button';
 import InputField from '@/components/forms/InputField';
 import FooterLink from '@/components/forms/FooterLink';
 import {useRouter} from "next/navigation";
-import {signInWithEmail, signUpWithEmail} from "@/lib/actions/auth.actions";
+import {signInAsDemo, signInWithEmail, signUpWithEmail} from "@/lib/actions/auth.actions";
 import {toast} from "sonner";
+import {useState} from "react";
+import {DEMO_ACCOUNT} from "@/lib/demo-account";
 
 const SignIn = () => {
     const router = useRouter()
+    const [demoLoading, setDemoLoading] = useState(false)
+
+    const onDemo = async () => {
+        setDemoLoading(true)
+        const result = await signInAsDemo()
+        if (result.success) {
+            router.push('/')
+            router.refresh()
+        } else {
+            setDemoLoading(false)
+            toast.error('Demo sign in failed.', {description: 'Please try again in a moment.'})
+        }
+    }
     const {
         register,
         handleSubmit,
@@ -62,6 +77,26 @@ const SignIn = () => {
 
                 <FooterLink text="Don't have an account?" linkText="Create an account" href="/sign-up" />
             </form>
+
+            {process.env.NEXT_PUBLIC_DEV_MODE !== 'false' && (
+                <div className="mt-8 rounded-xl border border-dashed border-gray-600 bg-gray-800/40 p-4">
+                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                        Explore the demo — one click signs you in
+                    </p>
+                    <button
+                        type="button"
+                        onClick={onDemo}
+                        disabled={demoLoading}
+                        className="inline-flex h-9 items-center rounded-lg border border-gray-600 bg-gray-800 px-3.5 text-sm font-medium text-gray-100 shadow-sm transition-colors hover:border-yellow-500/60 hover:text-yellow-400 disabled:opacity-50"
+                    >
+                        {demoLoading ? 'Signing in…' : DEMO_ACCOUNT.name}
+                    </button>
+                    <p className="mt-3 text-xs leading-relaxed text-gray-500">
+                        Signs in to a demo account with a sample watchlist and portfolio. All holdings are fictional.
+                        Or sign in manually: <span className="font-mono">{DEMO_ACCOUNT.email}</span> / <span className="font-mono">{DEMO_ACCOUNT.password}</span>
+                    </p>
+                </div>
+            )}
         </>
     );
 };

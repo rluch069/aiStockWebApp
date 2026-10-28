@@ -81,6 +81,20 @@ export default function PortfolioPage() {
         await fetch(`/api/portfolio?ticker=${ticker}`, { method: 'DELETE' });
     };
 
+
+    const saveAssetToDB = async (ticker: string, shares: number, buyPrice: number) => {
+        try {
+            await fetch('/api/portfolio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticker, shares, buyPrice })
+            });
+            console.log(`Saved ${ticker} updates to database.`);
+        } catch (error) {
+            console.error("Failed to save asset update to DB", error);
+        }
+    };
+
     // --- API HANDLERS ---
     const runSimulation = async () => {
         setLoadingSim(true);
@@ -90,7 +104,8 @@ export default function PortfolioPage() {
                 days: days,
                 paths: paths
             };
-            const res = await fetch('http://localhost:8000/portfolio-predict', {
+            const AI_ENGINE_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${AI_ENGINE_URL}/portfolio-predict`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -121,9 +136,13 @@ export default function PortfolioPage() {
     //         });
     //         const savedData = await res.json();
     //
-    //         if (savedData.success) {
+    //         // STRICT CHECK: Ensure the simulation data actually came back
+    //         if (savedData.success && savedData.simulation) {
     //             alert("Simulation saved successfully!");
     //             setSavedSims([savedData.simulation, ...savedSims]);
+    //             setSimData(savedData.simulation); // Updates the active view so the save button hides
+    //         } else {
+    //             alert("Failed to save: Database returned an empty object.");
     //         }
     //     } catch (err) {
     //         alert("Failed to save simulation.");
@@ -140,15 +159,19 @@ export default function PortfolioPage() {
             });
             const savedData = await res.json();
 
-            // STRICT CHECK: Ensure the simulation data actually came back
-            if (savedData.success && savedData.simulation) {
+            if (savedData.success && savedData.sim) {
                 alert("Simulation saved successfully!");
-                setSavedSims([savedData.simulation, ...savedSims]);
-                setSimData(savedData.simulation); // Updates the active view so the save button hides
+
+                // Instantly inject the new database record into the top of the sidebar list
+                setSavedSims([savedData.sim, ...savedSims]);
+
+                // Update the active view with the DB version (which contains the new _id)
+                setSimData(savedData.sim);
             } else {
                 alert("Failed to save: Database returned an empty object.");
             }
         } catch (err) {
+            console.error("Save error:", err);
             alert("Failed to save simulation.");
         }
         setSaving(false);
@@ -191,6 +214,7 @@ export default function PortfolioPage() {
                                                 type="number" min="0" step="1"
                                                 value={asset.shares}
                                                 onChange={(e) => updateShares(asset.ticker, Number(e.target.value))}
+                                                onBlur={() => saveAssetToDB(asset.ticker, asset.shares, asset.buyPrice)}
                                                 className="bg-slate-950 border border-slate-700 rounded px-3 py-1 w-20 text-white focus:border-blue-500 outline-none transition-colors"
                                             />
                                         </td>
@@ -201,6 +225,8 @@ export default function PortfolioPage() {
                                                     type="number" min="0" step="0.01"
                                                     value={asset.buyPrice}
                                                     onChange={(e) => updateBuyPrice(asset.ticker, Number(e.target.value))}
+                                                    // 🟢 NEW: Saves to DB on click away
+                                                    onBlur={() => saveAssetToDB(asset.ticker, asset.shares, asset.buyPrice)}
                                                     className="bg-slate-950 border border-slate-700 rounded px-2 py-1 w-24 text-white focus:border-blue-500 outline-none transition-colors"
                                                 />
                                             </div>
@@ -370,25 +396,6 @@ export default function PortfolioPage() {
                                 })}
                             </div>
                         )}
-                        {/*{savedSims.length === 0 ? (*/}
-                        {/*    <p className="text-sm text-slate-500 italic">No saved simulations yet. Run an analysis and click save to archive it here.</p>*/}
-                        {/*) : (*/}
-                        {/*    <div className="flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">*/}
-                        {/*        {savedSims.map((sim, idx) => (*/}
-                        {/*            <button*/}
-                        {/*                key={sim._id || idx}*/}
-                        {/*                onClick={() => setSimData(sim)}*/}
-                        {/*                className="text-left bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/50 p-4 rounded-lg transition-all group"*/}
-                        {/*            >*/}
-                        {/*                <p className="text-xs text-slate-400 mb-1">{new Date(sim.dateSaved).toLocaleDateString()} • {sim.days} Days</p>*/}
-                        {/*                <p className="font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">${sim.initial_value.toLocaleString()} Portfolio</p>*/}
-                        {/*                <p className={`text-sm font-bold ${sim.expected_mean >= sim.initial_value ? 'text-emerald-500' : 'text-red-500'}`}>*/}
-                        {/*                    Exp: ${sim.expected_mean.toLocaleString()}*/}
-                        {/*                </p>*/}
-                        {/*            </button>*/}
-                        {/*        ))}*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
                     </div>
                 </div>
 
