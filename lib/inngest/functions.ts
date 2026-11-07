@@ -50,8 +50,8 @@ export const sendSignUpEmail = inngest.createFunction(
 )
 
 export const sendDailyNewsSummary = inngest.createFunction(
-    // cron: at minute 0 of hour 12 every day -> runs daily at 12:00 UTC
-    {id: 'daily-news-summary', triggers: [{event: 'app/send.daily.news'}, { cron: '0 12 * * *' }]},
+    // Daily cron (0 12 * * *) removed: now only sent when 'app/send.daily.news' is triggered
+    {id: 'daily-news-summary', triggers: {event: 'app/send.daily.news'}},
     async ({step}) =>{
         const users = await step.run('get-users', getAllUsersForNewsEmail);
         if(!users || users.length ===0) return {success: false, message: 'No users found'};
