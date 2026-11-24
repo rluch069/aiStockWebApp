@@ -1,8 +1,8 @@
-// One-click demo account shown on the sign-in page (same idea as the dental app and AXYS portal).
-// The account and its sample data are created the first time someone clicks the demo button.
+// The shared demo account every visitor is signed in to (app/api/demo/route.ts); there is no sign-in page.
+// The account and its sample data are created the first time someone opens the app.
 export const DEMO_ACCOUNT = {
     name: 'Demo Investor',
-    email: 'demo@stocksapp.dev', // no hyphen: the sign-in form's email pattern only allows \w characters
+    email: 'demo@stocksapp.dev',
     password: 'Demo#2026',
 };
 

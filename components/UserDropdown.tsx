@@ -3,29 +3,16 @@
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuGroup,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {useRouter} from "next/navigation";
-import {Button} from "@/components/ui/button";
-import {LogOut} from "lucide-react";
 import NavItems from "@/components/NavItems";
-import {signOut} from "@/lib/actions/auth.actions";
 
 
 const UserDropdown = ({user, initialStocks}: {user: User, initialStocks: StockWithWatchlistStatus[]}) => {
-    const router = useRouter();
-
-    const handleSignOut = async () => {
-        await signOut();
-        router.push("/sign-in");
-        router.refresh();
-    }
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-3 text-gray-4 hover:text-yellow-500">
@@ -67,17 +54,7 @@ const UserDropdown = ({user, initialStocks}: {user: User, initialStocks: StockWi
                     </DropdownMenuLabel>
                 </DropdownMenuGroup>
 
-                <DropdownMenuSeparator className="bg-gray-600"/>
-
-                <DropdownMenuItem
-                    onClick={handleSignOut}
-                    className="text-gray-100 text-md font-medium focus:bg-transparent focus:text-yellow-500 transition-colors cursor-pointer"
-                >
-                    <LogOut className="h-4 w-4 mr-2 hidden sm:block" />
-                    Logout
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator className="hidden sm:block bg-gray-600"/>
+                <DropdownMenuSeparator className="sm:hidden bg-gray-600"/>
 
                 <nav className="sm:hidden">
                     <NavItems initialStocks={initialStocks}/>
